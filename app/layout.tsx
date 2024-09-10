@@ -18,9 +18,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <Head>
-        {/* DSCVR Canvas meta tags */}
+        {/* Meta tag indicating this is a DSCVR Canvas */}
         <meta name="dscvr:canvas:version" content="vNext" />
+        
+        {/* Open Graph image for previewing the Canvas */}
         <meta name="og:image" content="https://my-dscvr-canvas.vercel.app/preview-image.png" />
+        
+        <meta name="title" content="DSCVR Canvas RSVP App" />
+        <meta name="description" content="An RSVP app for events using the DSCVR Canvas platform." />
       </Head>
       <body className={inter.className}>{children}</body>
     </html>
