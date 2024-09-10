@@ -1,67 +1,59 @@
-"use client"; 
+"use client";
 
-import { useState } from 'react';
-import { CanvasClient } from '@dscvr-one/canvas-client-sdk';
-import { registerCanvasWallet } from '@dscvr-one/canvas-wallet-adapter';
-import styles from './rsvp.module.css';  
+import React, { useState, useEffect } from "react";
+import { CanvasClient } from "@dscvr-one/canvas-client-sdk";
+import { registerCanvasWallet } from "@dscvr-one/canvas-wallet-adapter";
+import styles from './rsvp.module.css';
+
 export default function RSVP() {
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const [isRSVPed, setIsRSVPed] = useState(false);
-  const [userMessage, setUserMessage] = useState<string | null>(null);
 
-  // Function to connect the user's Solana wallet via DSCVR Canvas SDK and wallet adapter
-  const connectWallet = async () => {
-    try {
-      const canvasClient = new CanvasClient();
-      registerCanvasWallet(canvasClient);  // Register DSCVR canvas wallet
+  // Initialize Canvas Client and perform handshake
+  useEffect(() => {
+    const connectToDSCVR = async () => {
+      try {
+        const canvasClient = new CanvasClient();
+        registerCanvasWallet(canvasClient);  // Register DSCVR canvas wallet
 
-      const response = await canvasClient.ready();
+        // Perform handshake with DSCVR to get user information
+        const response = await canvasClient.ready();
 
-      if (response && response.untrusted.user) {
-        const user = response.untrusted.user;
-
-        // Check if the user has a wallet connected
-        if (user.address) {
-          setWalletAddress(user.address);  // Set the wallet address if present
-          setUserMessage(null);  // Clear any previous message
-        } else {
-          // If no wallet is connected, prompt the user to connect one
-          setUserMessage("No wallet connected. Please connect your wallet to proceed.");
+        if (response && response.untrusted?.user) {
+          const user = response.untrusted.user;
+          setUserName(user.username);  // Get and display the user's name
         }
-      } else {
-        setUserMessage("Unable to retrieve user information. Please try again.");
+      } catch (error) {
+        console.error("Error during handshake:", error);
       }
-    } catch (error) {
-      console.error("Error connecting wallet: ", error);
-      setUserMessage("Error connecting wallet. Please try again.");
-    }
-  };
+    };
 
-  // Function to handle the RSVP action
-  const handleRSVP = async () => {
-    if (!walletAddress) {
-      alert("Please connect your wallet first.");
+    connectToDSCVR();
+  }, []);
+
+  // Handle RSVP button click
+  const handleRSVP = () => {
+    if (!userName) {
+      alert("Please connect your wallet to RSVP.");
       return;
     }
-
-    setIsRSVPed(true);  // Mark as RSVP complete
+    setIsRSVPed(true);
   };
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>RSVP for the Event</h1>
-      {!walletAddress ? (
-        <>
-          <button className={styles.button} onClick={connectWallet}>Connect Wallet</button>
-          {userMessage && <p className={styles.errorMessage}>{userMessage}</p>}
-        </>
+      <h1 className={styles.title}>Hi {userName ? userName : "User"}, please connect your wallet</h1>
+      <p>To RSVP for this event, connect your wallet below.</p>
+
+      {!isRSVPed ? (
+        <button
+          className={`${styles.button} text-white font-bold py-2 px-4 rounded bg-blue-500 hover:bg-blue-400`}
+          onClick={handleRSVP}
+        >
+          {userName ? "RSVP Now" : "Connect Wallet to RSVP"}
+        </button>
       ) : (
-        <>
-          <p className={styles.message}>Connected Wallet: {walletAddress}</p>
-          <button className={styles.button} onClick={handleRSVP} disabled={isRSVPed}>
-            {isRSVPed ? "RSVPed!" : "RSVP Now"}
-          </button>
-        </>
+        <p className={styles.message}>Thank you, {userName}! You have successfully RSVP'd.</p>
       )}
     </div>
   );
