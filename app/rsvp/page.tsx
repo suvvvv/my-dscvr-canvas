@@ -53,7 +53,7 @@ export default function RSVP() {
           {userName ? "RSVP Now" : "Connect Wallet to RSVP"}
         </button>
       ) : (
-        <p className={styles.message}>Thank you, {userName}! You have successfully RSVP'd.</p>
+        <p>Thank you, {userName}! You have successfully RSVP&#39;d.</p>
       )}
     </div>
   );
