@@ -6,8 +6,8 @@ import Head from "next/head";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "DSCVR Canvas RSVP App",  
-  description: "An RSVP app for events using the DSCVR Canvas platform.", 
+  title: "DSCVR Canvas RSVP App",
+  description: "An RSVP app for events using the DSCVR Canvas platform.",
 };
 
 export default function RootLayout({
@@ -17,15 +17,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-
       <Head>
-
+        {/* DSCVR Canvas meta tags */}
         <meta name="dscvr:canvas:version" content="vNext" />
-        
-
-        <meta name="og:image" content="/preview-image.png" />
-
-
+        <meta name="og:image" content="https://my-dscvr-canvas.vercel.app/preview-image.png" />
       </Head>
       <body className={inter.className}>{children}</body>
     </html>
