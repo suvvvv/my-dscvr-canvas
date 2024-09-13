@@ -1,32 +1,38 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, Keypair, clusterApiUrl } from "@solana/web3.js";
+// pages/api/wallet.ts
+import { Connection, PublicKey, LAMPORTS_PER_SOL, clusterApiUrl } from '@solana/web3.js';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
-const connection = new Connection(clusterApiUrl("devnet"));
+const SOLANA_CLUSTER = 'devnet'; // Change to 'mainnet-beta' for production
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { destination, amount } = req.body;
+  const { walletAddress } = req.query;
 
-  if (!destination || !amount) {
-    res.status(400).json({ error: "Missing destination or amount" });
-    return;
+  if (!walletAddress) {
+    return res.status(400).json({ error: 'Missing wallet address' });
   }
 
   try {
-    const sender = Keypair.generate();  // Example sender, replace with actual wallet
-    const destinationKey = new PublicKey(destination);
+    const connection = new Connection(clusterApiUrl(SOLANA_CLUSTER)); // Connect to Solana cluster
+    const publicKey = new PublicKey(walletAddress as string);
 
-    const transaction = new Transaction().add(
-      SystemProgram.transfer({
-        fromPubkey: sender.publicKey,
-        toPubkey: destinationKey,
-        lamports: amount * LAMPORTS_PER_SOL,
-      })
-    );
+    // Fetch balance
+    const balance = await connection.getBalance(publicKey);
+    const balanceInSOL = balance / LAMPORTS_PER_SOL;
 
-    const signature = await connection.sendTransaction(transaction, [sender]);
-    await connection.confirmTransaction(signature);
-    res.status(200).json({ success: true, signature });
+    // Fetch recent transactions (limit 10 for example)
+    const transactionHistory = await connection.getConfirmedSignaturesForAddress2(publicKey, { limit: 10 });
+
+    res.status(200).json({
+      balance: balanceInSOL,
+      transactions: transactionHistory.map((tx) => ({
+        signature: tx.signature,
+        slot: tx.slot,
+        err: tx.err,
+        blockTime: tx.blockTime,
+      })),
+    });
   } catch (error) {
-    res.status(500).json({ error: "Transaction failed" });
+    console.error('Error fetching wallet data:', error);
+    res.status(500).json({ error: 'Error fetching wallet data' });
   }
 }
