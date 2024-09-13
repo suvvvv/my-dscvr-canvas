@@ -38,9 +38,9 @@ export default function RSVP() {
         console.log("CanvasClient is ready. Handshake complete. Response:", response);
 
         if (response && response.untrusted?.user) {
-          const user: CanvasInterface.Handshake.User = response.untrusted.user;
+          // const user: CanvasInterface.Handshake.User = response.untrusted.user;
           // const content: CanvasInterface.Handshake.Content = response.untrusted.content;
-          // const user = response.untrusted.user;
+          const user = response.untrusted.user;
           console.log("User object from DSCVR:", user);
 
           setUserName(user.username);
