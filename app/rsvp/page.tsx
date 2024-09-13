@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Connection, PublicKey, LAMPORTS_PER_SOL, clusterApiUrl } from '@solana/web3.js';
-import { CanvasInterface, CanvasClient } from '@dscvr-one/canvas-client-sdk';
+import { CanvasClient } from '@dscvr-one/canvas-client-sdk';
 import { registerCanvasWallet } from "@dscvr-one/canvas-wallet-adapter";
+import { Connection, PublicKey, LAMPORTS_PER_SOL, clusterApiUrl } from "@solana/web3.js";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faWallet, faCheckCircle, faPiggyBank } from "@fortawesome/free-solid-svg-icons";
 import styles from './rsvp.module.css';
 
 export default function RSVP() {
@@ -11,11 +13,9 @@ export default function RSVP() {
   const [userId, setUserId] = useState<string | null>(null);
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string>("");
-  const [walletBalance, setWalletBalance] = useState<number | null>(null); // State for wallet balance
+  const [walletBalance, setWalletBalance] = useState<number | null>(null); 
   const [isRSVPed, setIsRSVPed] = useState(false);
   const [userMessage, setUserMessage] = useState<string | null>(null);
-
-  const SOLANA_CLUSTER = "devnet"; // Use devnet or mainnet-beta
 
   useEffect(() => {
     console.log("Basic useEffect test: Hook is being triggered.");
@@ -34,12 +34,9 @@ export default function RSVP() {
         console.log("Wallet adapter registered.");
 
         const response = await canvasClient.ready();
-
         console.log("CanvasClient is ready. Handshake complete. Response:", response);
 
         if (response && response.untrusted?.user) {
-          // const user: CanvasInterface.Handshake.User = response.untrusted.user;
-          // const content: CanvasInterface.Handshake.Content = response.untrusted.content;
           const user = response.untrusted.user;
           console.log("User object from DSCVR:", user);
 
@@ -60,27 +57,29 @@ export default function RSVP() {
     connectToDSCVR();
   }, []);
 
-  // Fetch the wallet balance
+  // Handle fetching wallet balance
   const fetchWalletBalance = async () => {
     if (!walletAddress) {
-      setUserMessage("Please enter a wallet address.");
+      alert("Please enter your Solana wallet address.");
       return;
     }
 
     try {
-      const connection = new Connection(clusterApiUrl(SOLANA_CLUSTER));
+      const connection = new Connection(clusterApiUrl("devnet")); 
       const publicKey = new PublicKey(walletAddress);
       const balance = await connection.getBalance(publicKey);
       const balanceInSOL = balance / LAMPORTS_PER_SOL;
-      setWalletBalance(balanceInSOL); // Set the wallet balance in SOL
-      console.log("Wallet balance fetched:", balanceInSOL);
+
+      console.log(`Wallet balance: ${balanceInSOL} SOL`);
+      setWalletBalance(balanceInSOL);
+      setUserMessage(`Wallet balance: ${balanceInSOL} SOL`);
     } catch (error) {
       console.error("Error fetching wallet balance:", error);
       setUserMessage("Error fetching wallet balance.");
     }
   };
 
-  // Handle RSVP button click
+
   const handleRSVP = async () => {
     console.log("RSVP button clicked. Checking wallet connection...");
 
@@ -91,9 +90,6 @@ export default function RSVP() {
     }
 
     console.log("Wallet address entered:", walletAddress);
-
-    // Fetch wallet balance
-    await fetchWalletBalance();
 
     setTimeout(() => {
       setIsRSVPed(true);
@@ -106,36 +102,44 @@ export default function RSVP() {
     <div className={styles.container}>
       <h1 className={styles.title}>Hi {userName ? userName : "User"}, RSVP to our event</h1>
       {userAvatar && <img src={userAvatar} alt="User Avatar" className={styles.avatar} />}
-      {/* <p className={styles.subtitle}>Your username: {userName}</p>
-      <p className={styles.subtitle}>Your user ID: {userId}</p> */}
-      <p>To RSVP for this event, please connect your wallet below.</p>
-
-      {!isRSVPed ? (
-        <div className={styles.formContainer}>
-          <input
-            type="text"
-            className={styles.input}
-            placeholder="Enter your Solana wallet address"
-            value={walletAddress}
-            onChange={(e) => setWalletAddress(e.target.value)}
-          />
+      {isRSVPed ? (
+        <div>
+          <p className={styles.successMessage}>
+            <FontAwesomeIcon icon={faCheckCircle} className={styles.successIcon} /> {userMessage}
+          </p>
+          {walletBalance !== null && (
+            <p className={styles.balance}>
+              <FontAwesomeIcon icon={faPiggyBank} className={styles.balanceIcon} /> Wallet Balance: {walletBalance} SOL
+            </p>
+          )}
+        </div>
+      ) : (
+        <div>
+          <p className={styles.subtitle}>Please enter your Solana wallet address below to RSVP:</p>
+          <div className={styles.inputContainer}>
+            <FontAwesomeIcon icon={faWallet} className={styles.walletIcon} />
+            <input
+              type="text"
+              className={styles.input}
+              placeholder="Enter your Solana wallet address"
+              value={walletAddress}
+              onChange={(e) => setWalletAddress(e.target.value)}
+            />
+          </div>
           <button
             className={`${styles.button} text-white font-bold py-2 px-4 rounded`}
             onClick={handleRSVP}
           >
             {userName ? "RSVP Now" : "Connect Wallet to RSVP"}
           </button>
-        </div>
-      ) : (
-        <div>
-          <p className={styles.successMessage}>{userMessage}</p>
-          {walletBalance !== null && (
-            <p className={styles.balance}>Wallet Balance: {walletBalance.toFixed(2)} SOL</p> 
-          )}
+          <button
+            className={`${styles.button} text-white font-bold py-2 px-4 rounded bg-green-500 mt-4`}
+            onClick={fetchWalletBalance}
+          >
+            <FontAwesomeIcon icon={faPiggyBank} /> View Wallet Balance
+          </button>
         </div>
       )}
-
-      {userMessage && !isRSVPed && <p className={styles.errorMessage}>{userMessage}</p>}
     </div>
   );
 }
