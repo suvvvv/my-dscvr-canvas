@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { CanvasClient } from "@dscvr-one/canvas-client-sdk";
+import { CanvasInterface, CanvasClient } from '@dscvr-one/canvas-client-sdk';
 import { registerCanvasWallet } from "@dscvr-one/canvas-wallet-adapter";
 import styles from './rsvp.module.css';
 
@@ -12,6 +12,12 @@ export default function RSVP() {
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [isRSVPed, setIsRSVPed] = useState(false);
   const [userMessage, setUserMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log("Basic useEffect test: Hook is being triggered.");
+
+  }, []);
+  
 
   // Initialize DSCVR Canvas and register the wallet adapter
   useEffect(() => {
@@ -25,18 +31,22 @@ export default function RSVP() {
         registerCanvasWallet(canvasClient);
         console.log("Wallet adapter registered.");
 
-        // Wait for the DSCVR Canvas handshake to complete
+
         const response = await canvasClient.ready();
         console.log("CanvasClient is ready. Handshake complete. Response:", response);
 
-        // Check if the response contains user info
+
         if (response && response.untrusted?.user) {
+          // const user: CanvasInterface.Handshake.User = response.untrusted.user;
+          // const content: CanvasInterface.Handshake.Content = response.untrusted.content;
+// console.log("content",content);
+console.log("response",response);
           const user = response.untrusted.user;
           console.log("User object from DSCVR:", user);
 
           setUserName(user.username);
           setUserId(user.id);
-          setUserAvatar(user.avatar || null); // Handle optional avatar
+          setUserAvatar(user.avatar || null); 
           console.log("User info set:", { username: user.username, id: user.id, avatar: user.avatar });
         } else {
           console.log("No user info found in the DSCVR handshake response.");
@@ -63,12 +73,12 @@ export default function RSVP() {
 
     console.log("Wallet address entered:", walletAddress);
 
-    // Simulate backend processing (you should call your backend API here)
+
     setTimeout(() => {
       setIsRSVPed(true);
       console.log("RSVP successful");
       setUserMessage(`Thank you, ${userName}! You have successfully RSVP'd with wallet: ${walletAddress}`);
-    }, 1000);  // Simulate backend delay
+    }, 1000);  
   };
 
   return (

@@ -1,24 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
   async headers() {
     return [
       {
-        source: '/(.*)', // Apply to all routes
+        source: '/(.*)',
         headers: [
           {
             key: 'Content-Security-Policy',
             value: `
-              default-src 'self'; 
-              script-src 'self'; 
-              style-src 'self'; 
-              img-src 'self' https://my-dscvr-canvas.vercel.app https://your-external-image-source.com data:; 
-              font-src 'self'; 
-              frame-ancestors 'self' https://dscvr.one; 
-              object-src 'none'; 
-              base-uri 'self';
-              form-action 'self'; 
-              upgrade-insecure-requests;
-            `.replace(/\n/g, ''), // Ensure single-line CSP string
+              default-src 'self';
+              script-src 'self' 'unsafe-inline' 'unsafe-eval' https:;
+              style-src 'self' 'unsafe-inline' https:;
+              font-src 'self' https:;
+              img-src 'self' data: https:;
+              connect-src 'self' https:;
+              frame-src 'self' https:`
+              .replace(/\n/g, '').trim(), 
           },
         ],
       },
