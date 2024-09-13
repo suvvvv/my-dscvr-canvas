@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Head from "next/head";
+import Head from "next/head";  // Import the Head component
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,11 +21,12 @@ export default function RootLayout({
         {/* Meta tag indicating this is a DSCVR Canvas */}
         <meta name="dscvr:canvas:version" content="vNext" />
         
-        {/* Open Graph image for previewing the Canvas */}
+        {/* Open Graph Image for previewing the Canvas */}
         <meta name="og:image" content="https://my-dscvr-canvas.vercel.app/preview-image.png" />
-        
-        <meta name="title" content="DSCVR Canvas RSVP App" />
-        <meta name="description" content="An RSVP app for events using the DSCVR Canvas platform." />
+
+        {/* Add a title and description for the Canvas */}
+        <meta name="title" content="RSVP for the Event" />
+        <meta name="description" content="RSVP now for our exclusive event on DSCVR." />
       </Head>
       <body className={inter.className}>{children}</body>
     </html>
